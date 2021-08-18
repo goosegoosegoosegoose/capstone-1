@@ -11,11 +11,15 @@
 {% endif %}
 
 {% if movies[0] %}
-    {% if not quotes[0] %}
-    <a href="/get-characters-quotes">
-        <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
-    </a>
-    {% endif %}
+{% if not quotes[0] %}   
+    <div class="content">
+        <a href="/get-characters-quotes">
+            <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
+        </a>
+    </div>
 {% endif %}
+{% endif %}
+
+<div id="loading"></div>
 
 {% endblock %}

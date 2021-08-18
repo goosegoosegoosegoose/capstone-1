@@ -57,3 +57,12 @@ $(".movie").on("click", function(evt){
 
     location.href = `http://localhost:5000/movies/${id}`
 });
+
+function loading(){
+    $("#loading").show();
+    $(".content").hide();
+}
+
+$("#char-quote-btn").on("click", function(){
+    loading();
+});

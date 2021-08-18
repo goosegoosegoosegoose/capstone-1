@@ -219,21 +219,8 @@ def get_movies():
 
     res = requests.get("https://the-one-api.dev/v2/movie", headers=headers)
     res = res.json()
-    # movies = {}
-
 
     for dict in res["docs"]:
-        # movie = {
-        #     "id": dict["_id"],
-        #     "name": dict["name"],
-        #     "runtime": dict["runtimeInMinutes"],
-        #     "budget": dict["budgetInMillions"],
-        #     "revenue": dict["boxOfficeRevenueInMillions"],
-        #     "academynoms": dict["academyAwardNominations"],
-        #     "academywins": dict["academyAwardWins"],
-        #     "rotten_t_score": dict["rottenTomatoesScore"]
-        # }
-        # movies.update(movie)
 
         _movie = Movie(
             id = dict["_id"],
@@ -339,7 +326,7 @@ def get_quotes():
         ran.remove(qnum)
         i+=1
     
-    return redirect("/")
+    return redirect("/characters")
 
 
 

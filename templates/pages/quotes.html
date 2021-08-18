@@ -3,6 +3,7 @@
 {% block title %}Quotes{% endblock %}
 
 {% block content %}
+<div id="loading"></div>
 {% for quote in quotes %}
 <div class="card" id="quote-list">
     <div class="card-body" >
@@ -27,11 +28,14 @@
 </div>
 {% endfor %}
 
+
 {% if movies[0] %}
 {% if not quotes[0] %}
-<a href="/get-characters-quotes">
-    <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
-</a>
+<div class="content">
+    <a href="/get-characters-quotes">
+        <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
+    </a>
+</div>
 {% endif %}
 {% endif %}
 
