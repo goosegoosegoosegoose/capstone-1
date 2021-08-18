@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="display-1">Welcome to my capstone. LOTR is cool. Please click the links on the navbar to explore.</h1>
+
+{% if not movies[0] %}
+<a href="/get-movies">
+    <button type="button" class="btn btn-primary btn-lg" id="movie-btn">Get Movies</button>
+</a>
+{% endif %}
+
+{% if movies[0] %}
+    {% if not quotes[0] %}
+    <a href="/get-characters-quotes">
+        <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
+    </a>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

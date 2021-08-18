@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}{{movie.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        <img src="{{movie.image_url}}" alt="profile pic">
+    </div>
+    <div class="col-md-6">
+        <h3><b>{{movie.name}}</b></h3>
+        <p>
+            Runtime: {{movie.runtime}}<br>
+            Budget in Millions: {{movie.budget}}<br>
+            Revenue in Millions: {{movie.revenue}}<br>
+            Academy Nominations: {{movie.academynoms}}<br>
+            Academy Wins: {{movie.academywins}}<br>
+            Rotten Tomato Score: {{movie.rotten_t_score}}<br>
+        </p>
+    </div>
+</div>
+<hr>
+<div class="row">
+    {% if movie.quotes %}
+    <div class="col-md-8" id="movie-quotes">
+        <h3>Quotes from this movie:</h3><br>
+        {% for quote in movie.quotes %}
+        <div class="card" id="quote-list">
+            <div class="card-body" >
+                <blockquote class="blockquote mb-0 my-2" id="{{quote.id}}">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if quote.user[0] %}
+                    {% if g.user.id == quote.user[0].id %}
+                    <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                        <button class="btn btn-info">Unlike</button>
+                    </form>
+                    {% endif %}
+                {% else %}
+                <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                    <button class="btn btn-outline-info">Like</button>
+                </form>
+                {% endif %}
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}{{user.username}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <img src="{{user.image_url}}" alt="profile pic">
+    </div>
+    <div class="col-md-4">
+        <h3><b>{{user.username}}</b></h3>
+        <p>
+            Email: {{user.email}}<br>
+            Bio: {{user.bio}}
+        </p>
+        {% if g.user.id == user.id %}
+        <a href="/users/delete"><button class="btn btn-md btn-danger">Delete User</button></a>
+        {% endif %}
+    </div>
+</div>
+<hr>
+<div class="row">
+    {% if user.favchars %}
+    <div class="col-md-8" id="favchars">
+        <h3 class="my-2">Favorite Characters</h3><br>
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Race</th>
+                <th scope="col">Realm</th>
+                {% if g.user.id == user.id %}
+                    <th scope="col">Like</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody id="chars-tbody">
+            {% for char in user.favchars %}
+                <tr class ="char-list-item" id="{{char.id}}" style="cursor: pointer;">
+                    <td scope="col">{{char.name}}</td></col>
+                    <td scope="col">{{char.race}}</td></col>
+                    <td scope="col">
+                        {% if char.realm %}
+                        {{char.realm}}
+                        {% else %}
+                        NA
+                        {% endif %}
+                    </td>
+                    {% if g.user.id == user.id %}
+                    <td>
+                        {% if user in char.user %}
+                        {% if user.id == char.user[char.user.index(user)].id %}
+                        <form method="POST" action="/users/fav_char/{{char.id}}">
+                            <button class="btn btn-info">Unlike</button>
+                        </form>
+                        {% endif %}
+                        {% else %}
+                        <form method="POST" action="/users/fav_char/{{char.id}}">
+                            <button class="btn btn-outline-info">Like</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    {% endif %}
+    {% if user.favquotes %}
+    <div class="col-md-8" id="favquotes">
+        <h3 class="my-2">Favorite Quotes</h3><br>
+        {% for quote in user.favquotes %}
+        <div class="card" id="quote-list">
+            <div class="card-body" >
+                <blockquote class="blockquote mb-0 my-2" id="{{quote.id}}">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if g.user.id == user.id %}
+                        {% if user in quote.user %}
+                            {% if user.id == quote.user[quote.user.index(user)].id %}
+                            <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                                <button class="btn btn-info">Unlike</button>
+                            </form>
+                            {% endif %}
+                        {% else %}
+                        <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                            <button class="btn btn-outline-info">Like</button>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

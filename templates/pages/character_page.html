@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}{{char.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        <h3><b>{{char.name}}</b></h3>
+        <p>
+            Race: {{char.race}}<br>
+            Birth: {{char.birth}}<br>
+            Death: {{char.death}}<br>
+            Realm: {{char.realm}}<br>
+            Hair: {{char.hair}}<br>
+            Height: {{char.height}}<br>
+            Spouse: {{char.spouse}}<br>
+            Gender: {{char.gender}}<br>
+        </p>
+    </div>
+</div>
+<hr>
+<div class="row">
+    {% if char.quotes %}
+    <div class="col-md-8" id="char-quotes">
+        <h3>Quotes from this character</h3>
+        {% for quote in char.quotes %}
+        <div class="card">
+            <div class="card-body" id="quote-list">
+                <blockquote class="blockquote mb-0 my-2" id="{{quote.id}}">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if quote.user[0] %}
+                    {% if g.user.id == quote.user[0].id %}
+                    <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                        <button class="btn btn-info">Unlike</button>
+                    </form>
+                    {% endif %}
+                {% else %}
+                <form method="POST" action="/users/fav_quote/{{quote.id}}">
+                    <button class="btn btn-outline-info">Like</button>
+                </form>
+                {% endif %}
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endif %}
+</div>
+
+{% endblock %}

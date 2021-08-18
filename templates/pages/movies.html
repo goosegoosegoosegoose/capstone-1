@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Movies{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card movie" id="{{fotr.id}}" style="width: 24rem; cursor: pointer;">
+      <img class="card-img-top" src="https://m.media-amazon.com/images/I/81EBp0vOZZL._AC_SY741_.jpg" alt="FOTR">
+      <div class="card-body">
+        <p class="card-text">{{fotr.name}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card movie" id="{{ttt.id}}" style="width: 24rem; cursor: pointer;">
+      <img class="card-img-top" src="https://m.media-amazon.com/images/I/81eqQvveI6L._AC_SY679_.jpg" alt="TTT">
+      <div class="card-body">
+        <p class="card-text">{{ttt.name}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card movie" id="{{rotk.id}}" style="width: 24rem; cursor: pointer;">
+      <img class="card-img-top" src="https://m.media-amazon.com/images/I/91UP+jG-ypL._AC_SY679_.jpg" alt="ROTK">
+      <div class="card-body">
+        <p class="card-text">{{rotk.name}}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if not movies[0] %}
+<a href="/get-movies">
+    <button type="button" class="btn btn-primary btn-lg" id="movie-btn">Get Movies</button>
+</a>
+{% endif %}
+
+{% endblock %}

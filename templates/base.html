@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+
+        <a class="navbar-brand mx-3" href="/">Lord of the Rings</a>
+        <div class="navbar-collapse collapse">
+            <ul class="navbar-nav d-flex align-items-right">
+                <li class="nav-item" id="movies"><a class="nav-link" href="/movies">Movies</a></li>
+                <!-- could do a dropdown for movies -->
+                <li class="nav-item" id="characters"><a class="nav-link" href="/characters">Characters</a></li>
+                <li class="nav-item" id="quotes"><a class="nav-link" href="/quotes">Quotes</a></li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mx-5">
+                {% if not g.user %}
+                <li class="nav-item"><a class="nav-link" href="/signup">Create User</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                {% endif %}
+                {% if g.user %}
+                <li class="nav-item"><a class="nav-link" href="/users/{{g.user.id}}">Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="/users/edit">Edit</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+<!-- ms-auto is the new ml-auto i hate documentation -->
+
+    <div class="container">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+        <div class="alert alert-{{category}}">
+            {{message}}
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="container">
+    {% block header %}{% endblock %}
+    {% block content %}{% endblock %}
+    </div>
+    
+    <script src="https://unpkg.com/jquery"></script>
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
