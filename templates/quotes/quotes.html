@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Quotes{% endblock %}
+
+{% block content %}
+<div id="loading"></div>
+
+<div class="row justify-content-md-center">
+    <div class="col-md-8">
+        {% if movies[0] %}
+            {% if quotes[0] %}
+                {% if not g.user %}
+                <a href="/login">
+                    <button type="button" class="btn btn-success btn-lg btn-block text-white mb-2">Log in to be able to like your favorite quotes!</button>
+                </a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        {% for quote in quotes %}
+        <div class="card quote my-3" id="{{quote.id}}">
+            <div class="card-body">
+                <blockquote class="blockquote">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if g.user %}
+                    <div class="btn-toolbar">
+                        <div id="{{quote.id[-4:]}}" class="like-quote" data-id="{{quote.id}}">
+                            {% if g.user in quote.faveduser %}
+                                {% if g.user.id == quote.faveduser[quote.faveduser.index(g.user)].id %}
+                                <button class="btn btn-info text-white" data-id="{{quote.id}}">Unlike</button>
+                                {% endif %}
+                            {% else %}
+                            <button class="btn btn-info" data-id="{{quote.id}}">Like</button>
+                            {% endif %}
+                        </div>
+                        <a href="/quotes/{{quote.id}}/add-comment">
+                            <button type="button" class="btn btn-success">Comment</button>
+                        </a>
+                    </div>
+                    {% endif %}
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{% if movies[0] %}
+{% if not quotes[0] %}
+<div class="content">
+    <a href="/get-characters-quotes">
+        <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
+    </a>
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}{{query}}{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-md-center">
+    {% if quotes[0] %}
+    <div class="col-md-6">
+        <h2>Quote Search Results:</h2>
+        {% for quote in quotes %}
+        <div class="card quote my-3" id="{{quote.id}}">
+            <div class="card-body">
+                <blockquote class="blockquote">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if g.user %}
+                    <div class="btn-toolbar">
+                        <div id="{{quote.id[-4:]}}" class="like-quote" data-id="{{quote.id}}">
+                            {% if g.user in quote.faveduser %}
+                                {% if g.user.id == quote.faveduser[quote.faveduser.index(g.user)].id %}
+                                <button class="btn btn-info text-white" data-id="{{quote.id}}">Unlike</button>
+                                {% endif %}
+                            {% else %}
+                            <button class="btn btn-info" data-id="{{quote.id}}">Like</button>
+                            {% endif %}
+                        </div>
+                        <a href="/quotes/{{quote.id}}/add-comment">
+                            <button type="button" class="btn btn-success">Comment</button>
+                        </a>
+                    </div>
+                    {% endif %}
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if chars[0] %}
+    <div class="col-md-6">
+        <h2>Character Search Results:</h2>
+        <table class="table table-striped table-dark table-bordered table-hover my-3">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                {% if g.user %}
+                <th scope="col">Like/Comment</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody id="chars-tbody">
+            {% for char in chars %}
+            <tr class ="char-list-item" id="{{char.id}}" style="cursor: pointer;">
+              <td scope="col">{{char.name}}</td></col>
+              {% if g.user %}
+              <td>
+                <div class="btn-toolbar">
+                    <div id="{{char.id[-5:]}}" class="like-char" data-id="{{char.id}}">
+                    {% if g.user in char.faveduser %}
+                    {% if g.user.id == char.faveduser[char.faveduser.index(g.user)].id %}
+                    <button class="btn btn-info text-white like-char" data-id="{{char.id}}"">Unlike</button>
+                    {% endif %}
+                    {% else %}
+                    <button class="btn btn-info like-char" data-id="{{char.id}}">Like</button>
+                    {% endif %}
+                    </div>
+                    <a href="/characters/{{char.id}}/add-comment">
+                    <button type="button" class="btn btn-success">Comment</button>
+                    </a>
+                </div>    
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if not chars[0] %}
+    {% if not quotes[0] %}
+    <div class="col-md-6">
+        <h1 class="display text-white">No results found.</h1>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

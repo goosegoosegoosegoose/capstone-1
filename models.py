@@ -23,6 +23,27 @@ class FavQuote(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'), primary_key=True)
     quote_id = db.Column(db.Text, db.ForeignKey('quotes.id', ondelete='cascade'), primary_key=True)
 
+class Comment(db.Model):
+    """User comments on characters"""
+
+    __tablename__="comments"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    comment = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'))
+    char_id = db.Column(db.Text, db.ForeignKey('characters.id', ondelete='cascade'))
+    quote_id = db.Column(db.Text, db.ForeignKey('quotes.id', ondelete='cascade'))
+
+# class QuoteComment(db.Model):
+#     """User comments on quotes"""
+
+#     __tablename__="quotecomms"
+
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     comment = db.Column(db.Text, nullable=False)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'))
+#     quote_id = db.Column(db.Text, db.ForeignKey('quotes.id', ondelete='cascade'))
+
 
 class User(db.Model):
     """Users table"""
@@ -39,14 +60,28 @@ class User(db.Model):
     favquotes = db.relationship("Quote", 
                                 secondary="favquotes", 
                                 primaryjoin=(FavQuote.user_id == id),
-                                backref='user',
+                                backref='faveduser',
                                 passive_deletes=True)
     
     favchars = db.relationship("Character", 
                                 secondary="favchars", 
                                 primaryjoin=(FavChar.user_id == id),
-                                backref='user', 
+                                backref='faveduser', 
                                 passive_deletes=True)
+
+    comms = db.relationship("Comment", passive_deletes=True, backref="user")
+
+    # quotecomments = db.relationship("QuoteComment", passive_deletes=True, backref="user")
+
+    commedchars = db.relationship("Character", 
+                                secondary="comments", 
+                                primaryjoin=(Comment.user_id == id),
+                                passive_deletes=True)
+
+    commedquotes = db.relationship("Quote", 
+                                secondary="comments", 
+                                primaryjoin=(Comment.user_id == id), 
+                                passive_deletes=True)                                
 
     @classmethod
     def signup(cls, username, email, password, image_url, bio):
@@ -115,6 +150,12 @@ class Character(db.Model):
 
     quotes = db.relationship("Quote", passive_deletes=True, backref="char")
 
+    comms = db.relationship("Comment", passive_deletes=True, backref="char")
+
+    commedusers = db.relationship("User", 
+                        secondary="comments", 
+                        primaryjoin=(Comment.char_id == id))
+
 
 class Quote(db.Model):
     """Quotes from movies only"""
@@ -125,8 +166,9 @@ class Quote(db.Model):
     dialog = db.Column(db.Text, nullable=False)
     movie_id = db.Column(db.Text, db.ForeignKey('movies.id', ondelete='cascade'))
     char_id = db.Column(db.Text, db.ForeignKey('characters.id', ondelete='cascade'))
+
+    comms = db.relationship("Comment", passive_deletes=True, backref="quote")
     
-
-
-
-
+    commedusers = db.relationship("User", 
+                            secondary="comments", 
+                            primaryjoin=(Comment.quote_id == id))

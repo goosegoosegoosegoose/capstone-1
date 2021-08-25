@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{{char.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-md-center">
+    <div class="col-md-4">
+        <h3 class="text-white"><b>{{char.name}}</b></h3><br>
+        {% if g.user %}
+        <div class="btn-toolbar">
+          <div id="{{char.id[-5:]}}" class="like-char" data-id="{{char.id}}">
+          {% if g.user in char.faveduser %}
+            {% if g.user.id == char.faveduser[char.faveduser.index(g.user)].id %}
+            <button class="btn btn-info text-white like-char" data-id="{{char.id}}"">Unlike</button>
+            {% endif %}
+            {% else %}
+            <button class="btn btn-info like-char" data-id="{{char.id}}">Like</button>
+            {% endif %}
+          </div>
+          <a href="/characters/{{char.id}}/add-comment">
+            <button type="button" class="btn btn-success">Comment</button>
+          </a>
+        </div>    
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        <p class="text-white">
+            Race: {{char.race}}<br>
+            Birth: {{char.birth}}<br>
+            Death: {{char.death}}<br>
+            Realm: {{char.realm}}<br>
+            Hair: {{char.hair}}<br>
+            Height: {{char.height}}<br>
+            Spouse: {{char.spouse}}<br>
+            Gender: {{char.gender}}<br>
+        </p>
+    </div>
+</div>
+<hr>
+<div class="row">
+    {% if char.quotes %}
+    <div class="col-md-6" id="char-quotes">
+        <h3 class="text-white">Quotes from this character</h3>
+        {% for quote in char.quotes %}
+        <div class="card quote my-3" id="{{quote.id}}">
+            <div class="card-body" id="quote-list">
+                <blockquote class="blockquote">
+                    <p>{{quote.dialog}}</p>
+                    <footer class="blockquote-footer">
+                        <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
+                    </footer>
+                    {% if g.user %}
+                    <div class="btn-toolbar">
+                        <div id="{{quote.id[-4:]}}" class="like-quote" data-id="{{quote.id}}">
+                            {% if quote.faveduser[0] %}
+                                {% if g.user.id == quote.faveduser[0].id %}
+                                <button class="btn btn-info text-white" data-id="{{quote.id}}">Unlike</button>
+                                {% endif %}
+                            {% else %}
+                            <button class="btn btn-info" data-id="{{quote.id}}">Like</button>
+                            {% endif %}
+                        </div>
+                        <a href="/quotes/{{quote.id}}/add-comment">
+                            <button type="button" class="btn btn-success">Comment</button>
+                        </a>
+                    </div>
+                    {% endif %}                    
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="col-md-6" id="char-comments">
+        {% if char.comms %}
+        <h3>Comments from users</h3>
+        {% for i in range(0,char.comms|length)%}
+        <div class="card my-3"">
+            <div class="card-body" id="comment-list">
+                <blockquote class="blockquote" id="{{char.comms[i].user.id}}">
+                    <p>{{char.comms[i].comment}}</p>
+                </blockquote>
+                <footer class="blockquote-footer">
+                    <a href="/users/{{char.comms[i].user.id}}">{{char.comms[i].user.username}}</a>
+                </footer>
+                {% if g.user.id == char.comms[i].user.id %}
+                <a href="/comments/{{char.comms[i].id}}/delete">
+                    <button type="button" class="btn btn-danger text-white">Delete</button>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

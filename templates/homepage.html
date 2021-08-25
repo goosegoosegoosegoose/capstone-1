@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% block title %}Capstone{% endblock %}
+
+{% if not movies[0] %}
+<h1 class="display-1">Click this button get the movies to get started!</h1>
+<a href="/get-movies">
+    <button type="button" class="btn btn-primary btn-lg" id="movie-btn">Get Movies</button>
+</a>
+{% endif %}
+
+{% if movies[0] %}
+{% if not quotes[0] %}  
+    <h1 class="display-1">Now click this button to get quotes and the characters who said them from the movies we just got!</h1>
+    <div class="content">
+        <a href="/get-characters-quotes">
+            <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Quotes and Characters</button>
+        </a>
+    </div>
+{% endif %}
+{% endif %}
+
+<div id="loading"></div>
+
+{% if movies[0] %}
+{% if quotes[0] %}
+    <div class="row" id="random-quotes">
+    </div>
+    <button type="button" class="btn btn-light btn-lg" id="random-btn">Get random quotes!</button>
+{% endif %}
+{% endif %}
+
+{% endblock %}

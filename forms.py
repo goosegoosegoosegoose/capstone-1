@@ -18,3 +18,7 @@ class LoginForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired(message="Please enter your username")])
     password = PasswordField("Password")
 
+class AddCommentForm(FlaskForm):
+    """Comment form for quotes and characters"""
+
+    comment = TextAreaField("Comment", validators=[InputRequired(message="Please enter your comment")])

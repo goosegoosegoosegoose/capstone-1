@@ -1,17 +1,15 @@
-# pass: kankersore
-# token: MZ8oiSJNOwk0KtJdUItp
-
 from flask import Flask, render_template, request, jsonify, redirect, flash, session, g
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User, Movie, Character, Quote, FavChar, FavQuote
-from forms import CreateUserForm, LoginForm
+from models import db, connect_db, User, Movie, Character, Quote, Comment
+from forms import CreateUserForm, LoginForm, AddCommentForm
 import requests
 from sqlalchemy.exc import IntegrityError
 import random
-
-
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+load_dotenv()
 
 app.config['SECRET_KEY'] = "whatnow"
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
@@ -25,7 +23,8 @@ connect_db(app)
 db.create_all()
 
 url = 'https://the-one-api.dev/v2'
-headers = {'Authorization': 'Bearer MZ8oiSJNOwk0KtJdUItp'}
+token = os.environ.get("TOKEN")
+headers = {'Authorization': f'Bearer {token}'}
 CURR_USER_KEY = "curr_user"
 CURR_PATH = "curr_path"
 
@@ -54,7 +53,7 @@ def do_logout():
 
 
 
-# user stuff ------------------
+# user ------------------
 
 
 
@@ -80,7 +79,8 @@ def signup():
             return render_template('users/create.html', form=form)
 
         do_login(user)
-        return redirect("/")
+        prev_url = session['CURR_PATH']
+        return redirect(f"{prev_url}")
 
     else:
         return render_template('users/create.html', form=form)
@@ -100,7 +100,9 @@ def login():
         if user:
             do_login(user)
             flash("Successfully logged in", "success")
-            return redirect("/")
+            prev_url = session['CURR_PATH']
+            return redirect(f"{prev_url}")
+
         else:
             flash("Failed to log in", "danger")
             return redirect("/login")
@@ -111,29 +113,34 @@ def login():
 def logout():
     """logout handler"""
 
+    prev_url = session['CURR_PATH']
+    
+    if not g.user:
+        flash("User is not logged in", "danger")
+        return redirect(f'{prev_url}')
+
     do_logout()
     flash("Succussfully logged out", "success")
-    return redirect('/login')
+    prev_url = session['CURR_PATH']
+    return redirect(f"{prev_url}")
 
 @app.route("/users/<int:user_id>")
 def user_page(user_id):
     """user page"""
 
-    if not g.user:
-        flash("Access denied", "danger")
-        return redirect("/login")
-
     user = User.query.get_or_404(user_id)
-
-
+    
+    session['CURR_PATH'] = request.path
     return render_template("users/page.html", user=user)
 
 @app.route("/users/edit", methods=["GET", "POST"])
 def edit_user():
 
+    prev_url = session['CURR_PATH']
+    
     if not g.user:
-        flash("What are you doing here", "danger")
-        return redirect('/login')
+        flash("Please log in to edit profile", "danger")
+        return redirect(f'{prev_url}')
 
     form = CreateUserForm(obj=g.user)
 
@@ -147,75 +154,91 @@ def edit_user():
             g.user.bio = form.bio.data
             db.session.commit()
 
+            flash("Succesfully edited profile!", "success")
             return redirect(f"{g.user.id}")
     
-        flash("NICE TRY", "danger")
-        return redirect("/")
+        flash("Incorrect password", "danger")
+        return redirect(f"/users/edit")
     
     return render_template("users/edit.html", form=form)
 
 @app.route("/users/delete")
 def delete_user():
 
+    prev_url = session['CURR_PATH']
     if not g.user:
-        flash("Access denied", "danger")
-        return redirect("/login")
+        flash("Action unavailable", "danger")
+        return redirect(f"{prev_url}")
 
     do_logout()
     db.session.delete(g.user)
     db.session.commit()
 
     flash("Deleted user", "success")
-    return redirect("/signup")
+    return redirect(f"{prev_url}")
+
+
+# favoriting --------------
+
 
 @app.route("/users/fav_char/<char_id>", methods=["POST"])
 def char_fav(char_id):
 
+    prev_url = session['CURR_PATH']
     if not g.user:
         flash("Log in to favorite characters", "danger")
-        return redirect("/")
+        return redirect(f"{prev_url}")
 
     char = Character.query.get_or_404(char_id)
+    action = {}
 
     if char in g.user.favchars:
         g.user.favchars.remove(char)
         db.session.commit()
+
+        action[1] = 'unlike'
+        return jsonify(action=action)
+
     else:
         g.user.favchars.append(char)
         db.session.commit()
-    
-    return redirect("/characters")
+
+        action[1] = 'like'
+        return jsonify(action=action)
 
 @app.route("/users/fav_quote/<quote_id>", methods=["POST"])
 def quote_fav(quote_id):
 
+    prev_url = session['CURR_PATH']
     if not g.user:
         flash("Log in to favorite quotes", "danger")
-        return redirect("/")
+        return redirect(f"{prev_url}")
 
     quote = Quote.query.get_or_404(quote_id)
+    action = {}
 
     if quote in g.user.favquotes:
         g.user.favquotes.remove(quote)
         db.session.commit()
+
+        action[1] = 'unlike'
+        return jsonify(action=action)
+
     else:
         g.user.favquotes.append(quote)
         db.session.commit()
-    
-    return redirect("/quotes")
+
+        action[1] = 'like'
+        return jsonify(action=action)
 
 
-# api stuff ------------------
 
-# how do i call this stuff without a button
+# api ------------------
 
 @app.route("/get-movies")
 def get_movies():
     """get movies from api"""
     
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
 
     res = requests.get("https://the-one-api.dev/v2/movie", headers=headers)
     res = res.json()
@@ -243,22 +266,19 @@ def get_movies():
         db.session.add(_movie)
         db.session.commit()
 
-    return redirect("/movies")
+    prev_url = session['CURR_PATH']
+    return redirect(f"{prev_url}")
 
 @app.route("/get-characters-quotes")
 def get_quotes():
-    """Get quotes, and characters associated, from api"""
+    """Get quotes, and characters associated, from api. Redirect to previous url."""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
-    quotes = {}
-    chars = {}
+    # quotes = {}
+    # chars = {}
     i = 0
     ran = list(range(2,500))
 
-    while i < 20:
+    while i < 100:
 
         mnum = random.randrange(0,2)
         qnum = random.choice(ran)
@@ -266,38 +286,53 @@ def get_quotes():
 
         
         res = requests.get("https://the-one-api.dev/v2/movie/5cd95395de30eff6ebccde5" + movies[mnum] + "/quote", headers=headers)
-        # api doesn't provide a way to get random quotes, but this jank method only works with the original trilogy. who cares about the hobbit movies anyway right? haha..
-        # is there a method? my insomnia get requests capped out at 1000 while there were like 2600. Problem is they were ordered by movie so the first 100 would have all been from one movie.
         
+        print(res)
+
+        if res == None:
+            ran.remove(qnum)
+            i+=1
+            continue
+
         res = res.json()
 
-        if not Quote.query.get(res["docs"][qnum]["_id"]):
-            quote = {
-                    "id": res["docs"][qnum]["_id"],
-                    "dialog": res["docs"][qnum]["dialog"],
-                    "movie_id": res["docs"][qnum]["movie"],
-                    "char_id": res["docs"][qnum]["character"]
-            }
-            quotes[i] = quote
+        # if not Quote.query.get(res["docs"][qnum]["_id"]):
+        #     quote = {
+        #             "id": res["docs"][qnum]["_id"],
+        #             "dialog": res["docs"][qnum]["dialog"],
+        #             "movie_id": res["docs"][qnum]["movie"],
+        #             "char_id": res["docs"][qnum]["character"]
+        #     }
+        #     quotes[i] = quote
 
         if not Character.query.get(res["docs"][qnum]["character"]):
             resp = requests.get("https://the-one-api.dev/v2/character/" + res["docs"][qnum]["character"], headers=headers)
+            
+            if resp == None:
+                ran.remove(qnum)
+                i+=1                
+                continue
+            
             resp = resp.json()
 
+            if resp["docs"][0]["name"] == "MINOR_CHARACTER":
+                ran.remove(qnum)
+                i+=1
+                continue
 
-            char = {
-                    "id": resp["docs"][0]["_id"],
-                    "name": resp["docs"][0]["name"],
-                    "race": resp["docs"][0]["race"],
-                    "gender": resp["docs"][0]["gender"],
-                    "birth": resp["docs"][0]["birth"],
-                    "death": resp["docs"][0]["death"],
-                    "realm": resp["docs"][0]["realm"],
-                    "hair": resp["docs"][0]["hair"],
-                    "height": resp["docs"][0]["height"],
-                    "spouse": resp["docs"][0]["spouse"]
-            }
-            chars[i] = char
+            # char = {
+            #         "id": resp["docs"][0]["_id"],
+            #         "name": resp["docs"][0]["name"],
+            #         "race": resp["docs"][0]["race"],
+            #         "gender": resp["docs"][0]["gender"],
+            #         "birth": resp["docs"][0]["birth"],
+            #         "death": resp["docs"][0]["death"],
+            #         "realm": resp["docs"][0]["realm"],
+            #         "hair": resp["docs"][0]["hair"],
+            #         "height": resp["docs"][0]["height"],
+            #         "spouse": resp["docs"][0]["spouse"]
+            # }
+            # chars[i] = char
 
             _char = Character(
                 id = resp["docs"][0]["_id"],
@@ -326,96 +361,214 @@ def get_quotes():
         ran.remove(qnum)
         i+=1
     
-    return redirect("/characters")
+    prev_url = session['CURR_PATH']
+    return redirect(f"{prev_url}")
 
 
 
-# page stuff ----------------------
+# pages  -------------------------------
 
 
 @app.route("/")
 def homepage():
     """Hompage"""
 
-    if not g.user:
-        flash("Please log in", "warning")
-        return redirect("/login")
-
     movies = Movie.query.all()
     quotes = Quote.query.all()
     chars = Character.query.all()
- 
-    return render_template("pages/homepage.html", movies=movies, quotes=quotes, chars=chars)
+    
+    session['CURR_PATH'] = request.path
+    return render_template("homepage.html", movies=movies, quotes=quotes, chars=chars)
+
+@app.route("/results", methods=["POST"])
+def search_results():
+    """Search form?"""
+
+    query = request.form.get('search')
+    print(query)
+    search = f"%{query}%"
+    chars = Character.query.filter(Character.name.ilike(search)).all()
+    quotes = Quote.query.filter(Quote.dialog.ilike(search)).all()
+
+    return render_template("results.html", chars=chars, quotes=quotes, query=query)
+
+@app.route("/random")
+def homepage_random_quotes():
+    """Get 10 random quotes for webpage"""
+
+    quotes = Quote.query.all()
+    
+    length = list(range(0,len(quotes)))
+    results = {}
+
+    for i in range(0,10):
+
+        num = random.choice(length)
+        data = {
+            "id": quotes[num].id,
+            "short_id": quotes[num].id[-4:],
+            "dialog": quotes[num].dialog,
+            "movie": Movie.query.get(quotes[num].movie_id).name,
+            "movie_id": quotes[num].movie_id,
+            "char": Character.query.get(quotes[num].char_id).name,
+            "char_id": quotes[num].char_id,
+            "faveduser": quotes[num].faveduser
+        }
+        results[i] = data
+        length.remove(num)
+
+    return jsonify(quotes=results)
+
+
+
+# movies -------------
+
+
 
 @app.route("/movies")
 def movies_page():
     """Get movies from api, render page"""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
     movies = Movie.query.all()    
-    fotr = Movie.query.get_or_404("5cd95395de30eff6ebccde5c")
-    ttt = Movie.query.get_or_404("5cd95395de30eff6ebccde5b")
-    rotk= Movie.query.get_or_404("5cd95395de30eff6ebccde5d")
-
-    return render_template("pages/movies.html", movies=movies, fotr=fotr, ttt=ttt, rotk=rotk)
+    fotr = Movie.query.get("5cd95395de30eff6ebccde5c")
+    ttt = Movie.query.get("5cd95395de30eff6ebccde5b")
+    rotk= Movie.query.get("5cd95395de30eff6ebccde5d")
+    
+    session['CURR_PATH'] = request.path
+    return render_template("movies/movies.html", movies=movies, fotr=fotr, ttt=ttt, rotk=rotk)
 
 @app.route("/movies/<movie_id>")
 def movie_page(movie_id):
     """Single movie page with quotes maybe? maybe some main characters? def info"""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
     movie = Movie.query.get_or_404(movie_id)
+    
+    session['CURR_PATH'] = request.path
+    return render_template("movies/movie_page.html", movie=movie)
 
-    return render_template("pages/movie_page.html", movie=movie)
+
+
+# characters -------------------------------------
+
 
 
 @app.route("/characters")
 def chars_page():
     """characters page from existing quotes?"""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
     movies = Movie.query.all()
     chars = Character.query.all()
-
-
-    return render_template("pages/characters.html", chars=chars, movies=movies)
+    
+    session['CURR_PATH'] = request.path
+    return render_template("characters/characters.html", chars=chars, movies=movies)
 
 @app.route("/characters/<char_id>")
 def char_page(char_id):
+    """Character page with affliated quotes and user comments"""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
-    char = Character.query.get_or_404(char_id)
+    char = Character.query.get(char_id)
+    prev_url = session['CURR_PATH']
 
     if not char:
         flash("Character is not in database", "danger")
-        return redirect("/login")
+        return redirect(f"{prev_url}")
+    
+    session['CURR_PATH'] = request.path
+    return render_template("characters/character_page.html", char=char)
 
-    return render_template("pages/character_page.html", char=char)
+@app.route("/characters/<char_id>/add-comment", methods=["GET", "POST"])
+def add_char_comment(char_id):
+    """Add a comment to character"""
+
+    prev_url = session['CURR_PATH']
+    if not g.user:
+        flash("Log in to comment", "danger")
+        return redirect(f"{prev_url}")
+
+    form = AddCommentForm()
+    char = Character.query.get_or_404(char_id)
+
+    if form.validate_on_submit():
+        comment = Comment(
+            comment=form.comment.data,
+            user_id=g.user.id,
+            char_id=char.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+
+        flash("Comment added!", "success")
+        return redirect(f'{prev_url}')
+    
+    return render_template("characters/char_comment_form.html", form=form, char=char)
+
+
+
+# quotes -----------------------
+
+
+
 
 @app.route("/quotes")
 def quotes_page():
     """Quotes page"""
 
-    if not g.user:
-        flash("Please log in", "danger")
-        return redirect("/login")
-
     movies = Movie.query.all()
     quotes = Quote.query.all()
+    
+    session['CURR_PATH'] = request.path
+    return render_template("quotes/quotes.html", quotes=quotes, movies=movies)
 
-    return render_template("pages/quotes.html", quotes=quotes, movies=movies)
+@app.route("/quotes/<quote_id>")
+def quote_page(quote_id):
+    """Quote page with user comments"""
 
+    quote = Quote.query.get_or_404(quote_id)
+    
+    session['CURR_PATH'] = request.path
+    return render_template("quotes/quote_page.html", quote=quote)
 
-    # i'd really love it if i knew how to save the past path/url and redirect back to it
+@app.route("/quotes/<quote_id>/add-comment", methods=["GET", "POST"])
+def add_quote_comment(quote_id):
+    """Add comment to quote"""
+
+    prev_url = session['CURR_PATH']
+
+    if not g.user:
+        flash("Log in to comment", "danger")
+        return redirect(f"{prev_url}")
+
+    form = AddCommentForm()
+    quote = Quote.query.get_or_404(quote_id)
+    prev_url = session['CURR_PATH']
+
+    if form.validate_on_submit():
+        comment = Comment(
+            comment=form.comment.data,
+            user_id=g.user.id,
+            quote_id=quote.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+
+        flash("Comment added!", "success")
+        return redirect(f'{prev_url}')
+    
+    return render_template("quotes/quote_comment_form.html", form=form, quote=quote, prev_url=prev_url)
+
+@app.route("/comments/<int:comment_id>/delete")
+def delete_comment(comment_id):
+    """Delete comment if owner of comment"""
+
+    prev_url = session['CURR_PATH']
+
+    if not g.user:
+        flash("Access Denied", "danger")
+        return redirect(f"{prev_url}")    
+
+    comment = Comment.query.get_or_404(comment_id)
+    db.session.delete(comment)
+    db.session.commit()
+
+    flash("Comment deleted!", "success")
+    return redirect(f"{prev_url}")

@@ -4,32 +4,33 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row justify-content-md-center">
     <div class="col-md-4">
         <img src="{{user.image_url}}" alt="profile pic">
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 text-white">
         <h3><b>{{user.username}}</b></h3>
         <p>
             Email: {{user.email}}<br>
             Bio: {{user.bio}}
         </p>
         {% if g.user.id == user.id %}
-        <a href="/users/delete"><button class="btn btn-md btn-danger">Delete User</button></a>
+        <a href="/users/edit"><button type="button" class="btn btn-md btn-success">Edit Info</button></a>
+        <a href="/users/delete"><button type="button" class="btn btn-md btn-danger">Delete User</button></a>
         {% endif %}
     </div>
+
 </div>
 <hr>
+
 <div class="row">
     {% if user.favchars %}
-    <div class="col-md-8" id="favchars">
-        <h3 class="my-2">Favorite Characters</h3><br>
-        <table class="table table-striped table-bordered table-hover">
+    <div class="col-md-4" id="favchars">
+        <h3 class="my-2 text-white">Favorite Characters</h3><br>
+        <table class="table table-striped table-dark table-bordered table-hover my-3">
             <thead>
               <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Race</th>
-                <th scope="col">Realm</th>
                 {% if g.user.id == user.id %}
                     <th scope="col">Like</th>
                 {% endif %}
@@ -38,58 +39,50 @@
             <tbody id="chars-tbody">
             {% for char in user.favchars %}
                 <tr class ="char-list-item" id="{{char.id}}" style="cursor: pointer;">
-                    <td scope="col">{{char.name}}</td></col>
-                    <td scope="col">{{char.race}}</td></col>
-                    <td scope="col">
-                        {% if char.realm %}
-                        {{char.realm}}
-                        {% else %}
-                        NA
-                        {% endif %}
-                    </td>
+                    <td scope="col">{{char.name}}</td>
                     {% if g.user.id == user.id %}
                     <td>
-                        {% if user in char.user %}
-                        {% if user.id == char.user[char.user.index(user)].id %}
+                        {% if user in char.faveduser %}
+                        {% if user.id == char.faveduser[char.faveduser.index(user)].id %}
                         <form method="POST" action="/users/fav_char/{{char.id}}">
-                            <button class="btn btn-info">Unlike</button>
+                            <button class="btn btn-info text-white like-char" id="{{char.id}}">Unlike</button>
                         </form>
                         {% endif %}
                         {% else %}
                         <form method="POST" action="/users/fav_char/{{char.id}}">
-                            <button class="btn btn-outline-info">Like</button>
+                            <button class="btn btn-info like-char" id="{{char.id}}">Like</button>
                         </form>
                         {% endif %}
-                    </td>
                     {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-    <hr>
     {% endif %}
+
     {% if user.favquotes %}
-    <div class="col-md-8" id="favquotes">
-        <h3 class="my-2">Favorite Quotes</h3><br>
+    <div class="col-md-4" id="favquotes">
+        <h3 class="my-2 text-white">Favorite Quotes</h3><br>
         {% for quote in user.favquotes %}
-        <div class="card" id="quote-list">
-            <div class="card-body" >
+        <div class="card quote my-3" id="{{quote.id}}">
+            <div class="card-body" id="quote-list">
                 <blockquote class="blockquote mb-0 my-2" id="{{quote.id}}">
                     <p>{{quote.dialog}}</p>
                     <footer class="blockquote-footer">
                         <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
                     </footer>
                     {% if g.user.id == user.id %}
-                        {% if user in quote.user %}
-                            {% if user.id == quote.user[quote.user.index(user)].id %}
+                        {% if user in quote.faveduser %}
+                            {% if user.id == quote.faveduser[quote.faveduser.index(user)].id %}
                             <form method="POST" action="/users/fav_quote/{{quote.id}}">
-                                <button class="btn btn-info">Unlike</button>
+                                <button class="btn btn-info text-white like" id="{{quote.id}}">Unlike</button>
                             </form>
                             {% endif %}
                         {% else %}
                         <form method="POST" action="/users/fav_quote/{{quote.id}}">
-                            <button class="btn btn-outline-info">Like</button>
+                            <button class="btn btn-info like" id="{{quote.id}}">Like</button>
                         </form>
                         {% endif %}
                     {% endif %}
@@ -99,6 +92,31 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    <div class="col-md-4">
+        {% if user.comms %}
+        <h3 class="my-2 text-white">Comments</h3><br>
+        {% for i in range(0,user.comms|length) %}
+        <div class="card my-3" id="comment-card">
+            <div class="card-header">
+                {% if user.comms[i].char %}
+                <a href="/characters/{{user.comms[i].char.id}}">Character: {{user.comms[i].char.name}}</a>
+                {% else %}
+                <a href="/quotes/{{user.comms[i].quote.id}}">Quote: "{{user.comms[i].quote.dialog[0:30]}}..."</a>
+                {% endif %}
+            </div>
+            <div class="card-body" id="comment-list">
+                <blockquote class="blockquote" id="{{user.comms[i].id}}">
+                    <p>{{user.comms[i].comment}}</p>
+                </blockquote>
+                <a href="/comments/{{user.comms[i].id}}/delete">
+                    <button type="button" class="btn btn-danger text-white">Delete</button>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
 </div>
 
 {% endblock %}

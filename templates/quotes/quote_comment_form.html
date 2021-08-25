@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}Quote Comment{% endblock %}
 
 {% block content %}
-
 <div class="row">
     <div class="col-md-8">
-        <form action="/users/edit" method="POST">
+        <form action="/quotes/{{quote.id}}/add-comment" method="POST">
             {{form.hidden_tag()}}
             {% for field in form if field.widget.input_type != 'hidden' %}
             <div class="form-group my-2">
-                {{field.label(class_="text-white")}}:
+                {{field.label}}:
                 {{field(class_="form-control")}}
 
                 {% for err in field.errors %}
@@ -20,10 +19,11 @@
                 {% endfor %}
             </div>
             {% endfor %}
-            <a href="/"><button type="button" class="btn btn-secondary">Back</button></a> 
-            <button type="submit" class="btn btn-success">Edit User</button>
+            <div class="btn-group">
+                <a href="{{prev_url}}"><button type="button" class="btn btn-secondary">Back</button></a> 
+                <button type="submit" class="btn btn-success">Submit Comment</button>
+            </div>
         </form>
     </div>
 </div>
-
 {% endblock %}
