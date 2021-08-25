@@ -21,6 +21,7 @@ Challenges I faced:
 - Requesting from API then adding to database through a loop takes a while. Added a loader to relay to the user that it is loading but I'm fairly certain my way isn't efficient at all.
 - Since creating new html markup with JQuery does not inheret click handlers despite the markup having the same classes and ids, I had to use event delegation to one, avoid the like/comment buttons and the character link inside the quote blockqquote to also be links to the quote page, and two, have the like/unlike buttons to still be like/unlike buttons after swap. 
 - Could not figure out how to add like/unlike/comment buttons to the random quotes on homepage due to the fact I wanted two columns. The two column setup is made using a parent div to jinja, and I found I cannot dynamically create jinja since its a preload functionality. I'm sure theres a way I just do not know how.
+- I like the background but it makes the white text, which I think is the most contrasting, a bit illegible sometimes. Unsure how to fix other than making boxes underneath text, which might be more ugly.
 
 How to use:
 Create an account at https://the-one-api.dev/ to be assigned a bearer token. Create an .env file and enter TOKEN = yourtokenhere. Click the Get movies button to get movies first, then Get Characters and Quotes button to finish. Create a user to be able to log in, favorite, and comment on your favorite quotes and characters.
