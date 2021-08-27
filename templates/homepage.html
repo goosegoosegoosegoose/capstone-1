@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 
-{% block content %}
-
 {% block title %}Capstone{% endblock %}
 
+{% block content %}
+
 {% if not movies[0] %}
-<h1 class="display-1">Click this button get the movies to get started!</h1>
-<a href="/get-movies">
-    <button type="button" class="btn btn-primary btn-lg" id="movie-btn">Get Movies</button>
-</a>
+<div id="loading"></div>
+<h1 class="display-1">Assets are still loading, please refresh</h1>
 {% endif %}
 
 {% if movies[0] %}
@@ -22,11 +20,27 @@
 {% endif %}
 {% endif %}
 
-<div id="loading"></div>
+
+
 
 {% if movies[0] %}
 {% if quotes[0] %}
     <div class="row" id="random-quotes">
+        {% for i in range(0,20) %}
+        {% set num = r.pop() %}
+        <div class="col-md-6">
+            <div class="card quote my-3" id="{{quotes[num].id}}">
+                <div class="card-body">
+                    <blockquote class="blockquote">
+                        <p>{{quotes[num].dialog}}</p>
+                        <footer class="blockquote-footer">
+                            <a href="/characters/{{quotes[num].char_id}}">{{quotes[num].char.name}}</a>
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
     <button type="button" class="btn btn-light btn-lg" id="random-btn">Get random quotes!</button>
 {% endif %}

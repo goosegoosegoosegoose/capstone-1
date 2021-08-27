@@ -16,7 +16,7 @@
         </p>
         {% if g.user.id == user.id %}
         <a href="/users/edit"><button type="button" class="btn btn-md btn-success">Edit Info</button></a>
-        <a href="/users/delete"><button type="button" class="btn btn-md btn-danger">Delete User</button></a>
+        <a href="/users/delete"><button type="button" class="btn btn-md btn-danger mx-2">Delete User</button></a>
         {% endif %}
     </div>
 
@@ -32,7 +32,7 @@
               <tr>
                 <th scope="col">Name</th>
                 {% if g.user.id == user.id %}
-                    <th scope="col">Like</th>
+                    <th scope="col">Like/Comment</th>
                 {% endif %}
               </tr>
             </thead>
@@ -42,19 +42,22 @@
                     <td scope="col">{{char.name}}</td>
                     {% if g.user.id == user.id %}
                     <td>
-                        {% if user in char.faveduser %}
-                        {% if user.id == char.faveduser[char.faveduser.index(user)].id %}
-                        <form method="POST" action="/users/fav_char/{{char.id}}">
-                            <button class="btn btn-info text-white like-char" id="{{char.id}}">Unlike</button>
-                        </form>
-                        {% endif %}
-                        {% else %}
-                        <form method="POST" action="/users/fav_char/{{char.id}}">
-                            <button class="btn btn-info like-char" id="{{char.id}}">Like</button>
-                        </form>
-                        {% endif %}
-                    {% endif %}
+                        <div class="btn-toolbar">
+                            <div id="{{char.id[-5:]}}" class="like-char d-flex" data-id="{{char.id}}">
+                            {% if user in char.faveduser %}
+                                {% if user.id == char.faveduser[char.faveduser.index(user)].id %}
+                                <button class="btn btn-info text-white like-char" data-id="{{char.id}}"">Unlike</button>
+                                {% endif %}
+                                {% else %}
+                                <button class="btn btn-info like-char" data-id="{{char.id}}">Like</button>
+                            {% endif %}
+                            </div>
+                            <a href="/characters/{{char.id}}/add-comment">
+                                <button type="button" class="btn btn-success mx-2">Comment</button>
+                            </a>
+                        </div>
                     </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
@@ -68,23 +71,26 @@
         {% for quote in user.favquotes %}
         <div class="card quote my-3" id="{{quote.id}}">
             <div class="card-body" id="quote-list">
-                <blockquote class="blockquote mb-0 my-2" id="{{quote.id}}">
+                <blockquote class="blockquote mb-0 my-2">
                     <p>{{quote.dialog}}</p>
                     <footer class="blockquote-footer">
                         <a href="/characters/{{quote.char.id}}">{{quote.char.name}}</a>
                     </footer>
                     {% if g.user.id == user.id %}
-                        {% if user in quote.faveduser %}
-                            {% if user.id == quote.faveduser[quote.faveduser.index(user)].id %}
-                            <form method="POST" action="/users/fav_quote/{{quote.id}}">
-                                <button class="btn btn-info text-white like" id="{{quote.id}}">Unlike</button>
-                            </form>
+                    <div class="btn-toolbar">
+                        <div id="{{quote.id[-4:]}}" class="like-quote" data-id="{{quote.id}}">
+                            {% if user in quote.faveduser %}
+                                {% if user.id == quote.faveduser[quote.faveduser.index(user)].id %}
+                                <button class="btn btn-info text-white" data-id="{{quote.id}}">Unlike</button>
+                                {% endif %}
+                            {% else %}
+                            <button class="btn btn-info" data-id="{{quote.id}}">Like</button>
                             {% endif %}
-                        {% else %}
-                        <form method="POST" action="/users/fav_quote/{{quote.id}}">
-                            <button class="btn btn-info like" id="{{quote.id}}">Like</button>
-                        </form>
-                        {% endif %}
+                        </div>
+                        <a href="/quotes/{{quote.id}}/add-comment">
+                            <button type="button" class="btn btn-success mx-2">Comment</button>
+                        </a>
+                    </div>
                     {% endif %}
                 </blockquote>
             </div>
@@ -110,7 +116,7 @@
                     <p>{{user.comms[i].comment}}</p>
                 </blockquote>
                 <a href="/comments/{{user.comms[i].id}}/delete">
-                    <button type="button" class="btn btn-danger text-white">Delete</button>
+                    <button type="button" class="btn btn-danger text-white mx-2">Delete</button>
                 </a>
             </div>
         </div>

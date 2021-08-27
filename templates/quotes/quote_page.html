@@ -3,8 +3,17 @@
 {% block title %}{{quote.dialog}}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-md-center">
-    <div class="col-md-8">
+<div class="row">
+    <div class="col-md-4 my-2">
+        <div class="card h-100 movie" id="{{quote.movie.id}}" style="width: auto; cursor: pointer; max-height: 77vh">
+            <img class="card-img-top" src="{{quote.movie.image_url}}" alt="quote.movie.name">
+            <div class="card-body">
+                <p class="card-text d-flex justify-content-center">{{quote.movie.name}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
         <div class="card my-3" id="{{quote.id}}">
             <div class="card-body" id="quote-list">
                 <blockquote class="blockquote">
@@ -24,13 +33,14 @@
                             {% endif %}
                         </div>
                         <a href="/quotes/{{quote.id}}/add-comment">
-                            <button type="button" class="btn btn-success">Comment</button>
+                            <button type="button" class="btn btn-success mx-2">Comment</button>
                         </a>
                     </div>
                     {% endif %}
                 </blockquote>
             </div>     
         </div>
+
         {% if quote.comms %}
         <h3 class="text-white">Comments from users</h3>
         {% for i in range(0,quote.comms|length) %}
@@ -53,5 +63,9 @@
         {% endif %}
     </div>
 </div>
+
+
+
+
 
 {% endblock %}

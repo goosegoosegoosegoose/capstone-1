@@ -71,8 +71,6 @@ class User(db.Model):
 
     comms = db.relationship("Comment", passive_deletes=True, backref="user")
 
-    # quotecomments = db.relationship("QuoteComment", passive_deletes=True, backref="user")
-
     commedchars = db.relationship("Character", 
                                 secondary="comments", 
                                 primaryjoin=(Comment.user_id == id),
@@ -131,14 +129,13 @@ class Movie(db.Model):
     quotes = db.relationship("Quote", passive_deletes=True, backref="movie")
 
 
-
 class Character(db.Model):
     """Characters"""
 
     __tablename__='characters'
 
     id = db.Column(db.Text, primary_key=True)
-    name = db.Column(db.Text)
+    name = db.Column(db.Text, nullable=False)
     race = db.Column(db.Text)
     birth = db.Column(db.Text)
     death = db.Column(db.Text)

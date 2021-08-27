@@ -9,7 +9,7 @@
             {{form.hidden_tag()}}
             {% for field in form if field.widget.input_type != 'hidden' %}
             <div class="form-group my-2">
-                {{field.label}}:
+                <h3 class="text-white">{{field.label}}:</h3>
                 {{field(class_="form-control")}}
 
                 {% for err in field.errors %}
@@ -21,7 +21,7 @@
             {% endfor %}
             <div class="btn-group">
                 <a href="{{prev_url}}"><button type="button" class="btn btn-secondary">Back</button></a> 
-                <button type="submit" class="btn btn-success">Submit Comment</button>
+                <button type="submit" class="btn btn-success mx-2">Submit Comment</button>
             </div>
         </form>
     </div>

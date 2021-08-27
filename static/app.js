@@ -30,16 +30,16 @@ $(".quote").on("click", function(evt){
     location.href = `/quotes/${id}`
 })
 
-// when api is called hide button and show loading sign
-function loading(){
-    $("#loading").show();
-    $(".content").hide();
-}
+// // when api is called hide button and show loading sign
+// function loading(){
+//     $("#loading").show();
+//     $(".content").hide();
+// }
 
-// call loading after triggering retrieval of character and quote api info
-$("#char-quote-btn").on("click", function(){
-    loading();
-});
+// // call loading after triggering retrieval of character and quote api info
+// $("#char-quote-btn").on("click", function(){
+//     loading();
+// });
 
 // Click handler for favoriting and unfavoriting quotes
 $(".like-quote").on("click", "button", async function(evt){

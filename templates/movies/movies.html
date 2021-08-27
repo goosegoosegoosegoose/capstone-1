@@ -6,37 +6,22 @@
 
 {% if movies[0] %}
 <div class="row">
+  {% for i in range(5, movies|length) %}
   <div class="col-md-4">
-    <div class="card h-100 movie" id="{{fotr.id}}" style="width: 27rem; cursor: pointer;">
-      <img class="card-img-top" src="https://m.media-amazon.com/images/I/81EBp0vOZZL._AC_SY741_.jpg" alt="FOTR">
+    <div class="card h-100 movie" id="{{movies[i].id}}" style="width: auto; cursor: pointer;">
+      <img class="card-img-top" src="{{movies[i].image_url}}" alt="movies[i].name">
       <div class="card-body">
-        <p class="card-text d-flex justify-content-center">{{fotr.name}}</p>
+        <p class="card-text d-flex justify-content-center">{{movies[i].name}}</p>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card h-100 movie" id="{{ttt.id}}" style="width: 27rem; cursor: pointer;">
-      <img class="card-img-top" src="https://m.media-amazon.com/images/I/81eqQvveI6L._AC_SY679_.jpg" alt="TTT">
-      <div class="card-body">
-        <p class="card-text d-flex justify-content-center">{{ttt.name}}</p>
-      </div>
-    </div>
-  </div>   
-  <div class="col-md-4">
-    <div class="card h-100 movie" id="{{rotk.id}}" style="width: 27rem; cursor: pointer;">
-      <img class="card-img-top" src="https://m.media-amazon.com/images/I/91UP+jG-ypL._AC_SY679_.jpg" alt="ROTK">
-      <div class="card-body">
-        <p class="card-text d-flex justify-content-center">{{rotk.name}}</p>
-      </div>
-    </div>
-  </div>
+  {% endfor %}
 </div>
 {% endif %}
 
 {% if not movies[0] %}
-<a href="/get-movies">
-    <button type="button" class="btn btn-primary btn-lg" id="movie-btn">Get Movies</button>
-</a>
+<div id="loading"></div>
+<h1 class="display-1">Assets are still loading, please refresh</h1>
 {% endif %}
 
 {% endblock %}

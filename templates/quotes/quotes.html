@@ -3,7 +3,6 @@
 {% block title %}Quotes{% endblock %}
 
 {% block content %}
-<div id="loading"></div>
 
 <div class="row justify-content-md-center">
     <div class="col-md-8">
@@ -36,7 +35,7 @@
                             {% endif %}
                         </div>
                         <a href="/quotes/{{quote.id}}/add-comment">
-                            <button type="button" class="btn btn-success">Comment</button>
+                            <button type="button" class="btn btn-success mx-2">Comment</button>
                         </a>
                     </div>
                     {% endif %}
@@ -48,15 +47,10 @@
 </div>
 
 
-
-{% if movies[0] %}
 {% if not quotes[0] %}
-<div class="content">
-    <a href="/get-characters-quotes">
-        <button type="button" class="btn btn-primary btn-lg" id="char-quote-btn">Get Other Stuff</button>
-    </a>
+<div class="row" id="random-quotes">
 </div>
-{% endif %}
+<button type="button" class="btn btn-light btn-lg" id="random-btn">Get random quotes!</button>
 {% endif %}
 
 {% endblock %}

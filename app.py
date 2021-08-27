@@ -7,11 +7,12 @@ from sqlalchemy.exc import IntegrityError
 import random
 import os
 from dotenv import load_dotenv
+import secrets
 
 app = Flask(__name__)
 load_dotenv()
 
-app.config['SECRET_KEY'] = "whatnow"
+app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 debug = DebugToolbarExtension(app)
 
@@ -27,6 +28,106 @@ token = os.environ.get("TOKEN")
 headers = {'Authorization': f'Bearer {token}'}
 CURR_USER_KEY = "curr_user"
 CURR_PATH = "curr_path"
+
+
+# Pre-load functions
+def get_movies():
+    """get movies from api"""
+
+    res = requests.get("https://the-one-api.dev/v2/movie", headers=headers)
+    res = res.json()
+
+    for dict in res["docs"]:
+
+        _movie = Movie(
+            id = dict["_id"],
+            name = dict["name"],
+            runtime = dict["runtimeInMinutes"],
+            budget = dict["budgetInMillions"],
+            revenue = dict["boxOfficeRevenueInMillions"],
+            academynoms = dict["academyAwardNominations"],
+            academywins = dict["academyAwardWins"],
+            rotten_t_score = dict["rottenTomatoesScore"]
+        )
+
+        if _movie.id == "5cd95395de30eff6ebccde5c":
+            _movie.image_url = "https://m.media-amazon.com/images/I/81EBp0vOZZL._AC_SY741_.jpg"
+        if _movie.id == "5cd95395de30eff6ebccde5b":
+            _movie.image_url = "https://m.media-amazon.com/images/I/81eqQvveI6L._AC_SY679_.jpg"
+        if _movie.id == "5cd95395de30eff6ebccde5d":
+            _movie.image_url = "https://m.media-amazon.com/images/I/91UP+jG-ypL._AC_SY679_.jpg"
+        if _movie.id == "5cd95395de30eff6ebccde58":
+            _movie.image_url = "https://m.media-amazon.com/images/I/71mOQV8-GzL._AC_SL1007_.jpg"
+        if _movie.id == "5cd95395de30eff6ebccde59":
+            _movie.image_url = "https://m.media-amazon.com/images/I/7145Wo9GjlL._AC_SL1006_.jpg"
+        if _movie.id == "5cd95395de30eff6ebccde5a":
+            _movie.image_url = "https://m.media-amazon.com/images/I/A1QbAD2iMVL._AC_SL1500_.jpg"
+
+        db.session.add(_movie)
+
+    db.session.commit()
+
+def get_characters():
+    """Get all characters except MINOR_CHARACTER name ones from api"""
+
+    res = requests.get("https://the-one-api.dev/v2/character", headers=headers)
+    res = res.json()
+
+    for char in res["docs"]:
+
+        if char["name"] == "MINOR_CHARACTER":
+            continue
+        
+        _char = Character(
+            id = char["_id"],
+            name = char["name"],
+            race = char["race"],
+            gender = char.get("gender", ""),
+            birth = char["birth"],
+            death = char["death"],
+            realm = char["realm"],
+            hair = char["hair"],
+            height = char["height"],
+            spouse = char["spouse"]
+        )
+        db.session.add(_char)
+    
+    db.session.commit()
+
+def get_quotes():
+    """Get all quotes from api."""
+
+    pages = [1,2,3]
+
+    for page in pages:
+        res = requests.get("https://the-one-api.dev/v2/quote?page=" + str(page), headers=headers)
+        res = res.json()         
+
+        for quote in res["docs"]:
+
+            if not Character.query.get(quote["character"]):
+                continue
+
+            _quote = Quote(
+                id = quote["_id"],
+                dialog = quote["dialog"],
+                movie_id =quote["movie"],
+                char_id = quote["character"]
+            )
+            db.session.add(_quote)
+    
+    db.session.commit()
+    
+# pre-load check
+if not Movie.query.all():
+    get_movies()
+
+if not Character.query.all():
+    get_characters()
+
+if not Quote.query.all():
+    get_quotes()
+
 
 @app.before_request
 def add_user_to_g():
@@ -51,8 +152,6 @@ def do_logout():
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
 
-
-
 # user ------------------
 
 
@@ -62,6 +161,7 @@ def signup():
     """Handle creating user"""
 
     form = CreateUserForm()
+    prev_url = session['CURR_PATH']
 
     if form.validate_on_submit():
         try:
@@ -79,17 +179,17 @@ def signup():
             return render_template('users/create.html', form=form)
 
         do_login(user)
-        prev_url = session['CURR_PATH']
         return redirect(f"{prev_url}")
 
     else:
-        return render_template('users/create.html', form=form)
+        return render_template('users/create.html', form=form, prev_url=prev_url)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """handling user login"""
 
     form = LoginForm()
+    prev_url = session['CURR_PATH']
 
     if form.validate_on_submit():
         user= User.authenticate(
@@ -100,14 +200,13 @@ def login():
         if user:
             do_login(user)
             flash("Successfully logged in", "success")
-            prev_url = session['CURR_PATH']
             return redirect(f"{prev_url}")
 
         else:
             flash("Failed to log in", "danger")
             return redirect("/login")
     
-    return render_template('users/login.html', form=form)
+    return render_template('users/login.html', form=form, prev_url=prev_url)
 
 @app.route("/logout")
 def logout():
@@ -160,7 +259,7 @@ def edit_user():
         flash("Incorrect password", "danger")
         return redirect(f"/users/edit")
     
-    return render_template("users/edit.html", form=form)
+    return render_template("users/edit.html", form=form, prev_url=prev_url)
 
 @app.route("/users/delete")
 def delete_user():
@@ -233,140 +332,9 @@ def quote_fav(quote_id):
 
 
 
-# api ------------------
-
-@app.route("/get-movies")
-def get_movies():
-    """get movies from api"""
-    
-
-    res = requests.get("https://the-one-api.dev/v2/movie", headers=headers)
-    res = res.json()
-
-    for dict in res["docs"]:
-
-        _movie = Movie(
-            id = dict["_id"],
-            name = dict["name"],
-            runtime = dict["runtimeInMinutes"],
-            budget = dict["budgetInMillions"],
-            revenue = dict["boxOfficeRevenueInMillions"],
-            academynoms = dict["academyAwardNominations"],
-            academywins = dict["academyAwardWins"],
-            rotten_t_score = dict["rottenTomatoesScore"]
-        )
-
-        if _movie.id == "5cd95395de30eff6ebccde5c":
-            _movie.image_url = "https://m.media-amazon.com/images/I/81EBp0vOZZL._AC_SY741_.jpg"
-        if _movie.id == "5cd95395de30eff6ebccde5b":
-            _movie.image_url = "https://m.media-amazon.com/images/I/81eqQvveI6L._AC_SY679_.jpg"
-        if _movie.id == "5cd95395de30eff6ebccde5d":
-            _movie.image_url = "https://m.media-amazon.com/images/I/91UP+jG-ypL._AC_SY679_.jpg"
-
-        db.session.add(_movie)
-        db.session.commit()
-
-    prev_url = session['CURR_PATH']
-    return redirect(f"{prev_url}")
-
-@app.route("/get-characters-quotes")
-def get_quotes():
-    """Get quotes, and characters associated, from api. Redirect to previous url."""
-
-    # quotes = {}
-    # chars = {}
-    i = 0
-    ran = list(range(2,500))
-
-    while i < 100:
-
-        mnum = random.randrange(0,2)
-        qnum = random.choice(ran)
-        movies = ["b", "c", "d"]
-
-        
-        res = requests.get("https://the-one-api.dev/v2/movie/5cd95395de30eff6ebccde5" + movies[mnum] + "/quote", headers=headers)
-        
-        print(res)
-
-        if res == None:
-            ran.remove(qnum)
-            i+=1
-            continue
-
-        res = res.json()
-
-        # if not Quote.query.get(res["docs"][qnum]["_id"]):
-        #     quote = {
-        #             "id": res["docs"][qnum]["_id"],
-        #             "dialog": res["docs"][qnum]["dialog"],
-        #             "movie_id": res["docs"][qnum]["movie"],
-        #             "char_id": res["docs"][qnum]["character"]
-        #     }
-        #     quotes[i] = quote
-
-        if not Character.query.get(res["docs"][qnum]["character"]):
-            resp = requests.get("https://the-one-api.dev/v2/character/" + res["docs"][qnum]["character"], headers=headers)
-            
-            if resp == None:
-                ran.remove(qnum)
-                i+=1                
-                continue
-            
-            resp = resp.json()
-
-            if resp["docs"][0]["name"] == "MINOR_CHARACTER":
-                ran.remove(qnum)
-                i+=1
-                continue
-
-            # char = {
-            #         "id": resp["docs"][0]["_id"],
-            #         "name": resp["docs"][0]["name"],
-            #         "race": resp["docs"][0]["race"],
-            #         "gender": resp["docs"][0]["gender"],
-            #         "birth": resp["docs"][0]["birth"],
-            #         "death": resp["docs"][0]["death"],
-            #         "realm": resp["docs"][0]["realm"],
-            #         "hair": resp["docs"][0]["hair"],
-            #         "height": resp["docs"][0]["height"],
-            #         "spouse": resp["docs"][0]["spouse"]
-            # }
-            # chars[i] = char
-
-            _char = Character(
-                id = resp["docs"][0]["_id"],
-                name = resp["docs"][0]["name"],
-                race = resp["docs"][0]["race"],
-                gender = resp["docs"][0]["gender"],
-                birth = resp["docs"][0]["birth"],
-                death = resp["docs"][0]["death"],
-                realm = resp["docs"][0]["realm"],
-                hair = resp["docs"][0]["hair"],
-                height = resp["docs"][0]["height"],
-                spouse = resp["docs"][0]["spouse"]
-            )
-            db.session.add(_char)             
-
-        if not Quote.query.get(res["docs"][qnum]["_id"]):
-            _quote = Quote(
-                id = res["docs"][qnum]["_id"],
-                dialog = res["docs"][qnum]["dialog"],
-                movie_id = res["docs"][qnum]["movie"],
-                char_id = res["docs"][qnum]["character"]
-            )
-            db.session.add(_quote)
-            db.session.commit()
-
-        ran.remove(qnum)
-        i+=1
-    
-    prev_url = session['CURR_PATH']
-    return redirect(f"{prev_url}")
-
-
 
 # pages  -------------------------------
+
 
 
 @app.route("/")
@@ -376,9 +344,10 @@ def homepage():
     movies = Movie.query.all()
     quotes = Quote.query.all()
     chars = Character.query.all()
+    r = list(range(0,2273))
     
     session['CURR_PATH'] = request.path
-    return render_template("homepage.html", movies=movies, quotes=quotes, chars=chars)
+    return render_template("homepage.html", movies=movies, quotes=quotes, chars=chars, r=r)
 
 @app.route("/results", methods=["POST"])
 def search_results():
@@ -401,7 +370,7 @@ def homepage_random_quotes():
     length = list(range(0,len(quotes)))
     results = {}
 
-    for i in range(0,10):
+    for i in range(0,20):
 
         num = random.choice(length)
         data = {
@@ -430,12 +399,9 @@ def movies_page():
     """Get movies from api, render page"""
 
     movies = Movie.query.all()    
-    fotr = Movie.query.get("5cd95395de30eff6ebccde5c")
-    ttt = Movie.query.get("5cd95395de30eff6ebccde5b")
-    rotk= Movie.query.get("5cd95395de30eff6ebccde5d")
     
     session['CURR_PATH'] = request.path
-    return render_template("movies/movies.html", movies=movies, fotr=fotr, ttt=ttt, rotk=rotk)
+    return render_template("movies/movies.html", movies=movies)
 
 @app.route("/movies/<movie_id>")
 def movie_page(movie_id):
