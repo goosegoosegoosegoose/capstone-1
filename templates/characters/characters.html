@@ -26,9 +26,9 @@
       {% endif %}
     </tr>
   </thead>
-  <tbody id="chars-tbody">
+  <tbody id="chars-tbody content">
     {% for char in chars %}
-    <tr class ="char-list-item" id="{{char.id}}" style="cursor: pointer;">
+    <tr class ="char-list-item item" id="{{char.id}}" style="cursor: pointer;">
       <td scope="col">{{char.name}}</td></col>
       <td scope="col">{{char.race}}</td></col>
       <td scope="col">
@@ -60,6 +60,9 @@
     {% endfor %}
   </tbody>
 </table>
+<div class="pagination">
+  
+</div>
 {% endif %}
 
 {% if not chars[0] %}

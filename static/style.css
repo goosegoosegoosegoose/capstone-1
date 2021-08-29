@@ -38,3 +38,46 @@ div .card {
 table {
     font-family: 'what';
 }
+
+h1 {
+    color: white;
+    text-shadow: 2px 2px #0000;
+}
+
+h3 {
+    color: white;
+    text-shadow: 2px 2px #0000;
+}
+
+p .detail {
+    text-shadow: 2px 2px #0000;
+}
+
+.pagination > li > a
+{
+    background-color: white;
+    color: #014421;
+}
+
+.pagination > li > a:focus,
+.pagination > li > a:hover,
+.pagination > li > span:focus,
+.pagination > li > span:hover
+{
+    color: #014421;
+    background-color: #addfad;
+    border-color: #addfad;
+}
+
+.pagination > .active > a
+{
+    color: white;
+    background-color: #014421 !Important;
+    border: solid 1px #014421 !Important;
+}
+
+.pagination > .active > a:hover
+{
+    background-color: #014421 !Important;
+    border: solid 1px #014421;
+}

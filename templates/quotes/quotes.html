@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="row justify-content-md-center">
-    <div class="col-md-8">
+    <div class="col-md-8 content">
         {% if movies[0] %}
             {% if quotes[0] %}
                 {% if not g.user %}
@@ -16,7 +16,7 @@
             {% endif %}
         {% endif %}
         {% for quote in quotes %}
-        <div class="card quote my-3" id="{{quote.id}}">
+        <div class="card quote item my-3" id="{{quote.id}}">
             <div class="card-body">
                 <blockquote class="blockquote">
                     <p>{{quote.dialog}}</p>
@@ -45,7 +45,16 @@
         {% endfor %}
     </div>
 </div>
-
+<ul class="pagination pagination-md justify-content-center">
+  <li class="page-item previous-page disabled"><a class="page-link" href="#">Prev</a></li>
+  <li class="page-item current-page active"><a class="page-link" href="#">1</a></li>
+  <li class="page-item dots"><a class="page-link" href="#">...</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">5</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">6</a></li>
+  <li class="page-item dots"><a class="page-link" href="#">...</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">10</a></li>
+  <li ckass="page-item next-page"><a class="page-link" href="#">Next</a></li>
+</ul>
 
 {% if not quotes[0] %}
 <div class="row" id="random-quotes">
