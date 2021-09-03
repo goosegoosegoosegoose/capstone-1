@@ -20,14 +20,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', 'postgre
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
-connect_db(app)
-
 url = 'https://the-one-api.dev/v2'
 token = os.environ.get("TOKEN")
 headers = {'Authorization': f'Bearer {token}'}
 CURR_USER_KEY = "curr_user"
 CURR_PATH = "curr_path"
 
+connect_db(app)
 
 # Pre-load functions
 def get_movies():

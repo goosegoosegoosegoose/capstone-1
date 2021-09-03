@@ -1,19 +1,20 @@
 import os
 from unittest import TestCase
 from sqlalchemy import exc
+
 from models import db, User, Movie, Character, Quote
 
 os.environ['DATABASE_URL'] = "postgresql:///lotr_test"
 from app import app
 
-db.create_all()
 
 class ModelsTestCase(TestCase):
     """Test user model"""
 
     def setUp(self):
         """Test client and sample users"""
-
+        
+        db.session.remove()
         db.drop_all()
         db.create_all()
 
@@ -60,8 +61,9 @@ class ModelsTestCase(TestCase):
 
     def tearDown(self):
         res = super().tearDown()
-        db.session.rollback()
+        # what is this
         return res
+
 
     def test_user_model(self):
 
@@ -108,7 +110,7 @@ class ModelsTestCase(TestCase):
         db.session.commit()
 
         user = User.query.get(uid)
-        self.assertEqual(len(db.session.query(User.id).all()), 1)
+        self.assertEqual(len(db.session.query(User.id).all()), 2)
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@gmail.com")
         self.assertNotEqual(user.password, "password")
@@ -118,14 +120,14 @@ class ModelsTestCase(TestCase):
         # remember bcrypt
 
     def test_invalid_username_signup(self):
-        invalid = User.signup(None, "test@test.com", "password", None)
+        invalid = User.signup(None, "test@test.com", "password", None, None)
         uid = 123456
         invalid.id = uid
         with self.assertRaises(exc.IntegrityError) as context:
             db.session.commit()
 
     def test_invalid_email_signup(self):
-        invalid = User.signup("testtest", None, "password", None)
+        invalid = User.signup("testtest", None, "password", None, None)
         uid = 3425
         invalid.id = uid
         with self.assertRaises(exc.IntegrityError) as context:
@@ -133,10 +135,10 @@ class ModelsTestCase(TestCase):
     
     def test_invalid_password_signup(self):
         with self.assertRaises(ValueError) as context:
-            User.signup("testtest", "email@email.com", "", None)
+            User.signup("testtest", "email@email.com", "", None, None)
         
         with self.assertRaises(ValueError) as context:
-            User.signup("testtest", "email@email.com", None, None)
+            User.signup("testtest", "email@email.com", None, None, None)
 
     def test_movies_model(self):
         movie2 = Movie(
@@ -158,10 +160,8 @@ class ModelsTestCase(TestCase):
         db.session.commit()
 
         self.assertEqual(len(self.movie1.quotes), 1)
-        self.assertEqual(len(self.quote1.movie), 1)
 
         self.assertEqual(self.movie1.quotes[0].id, self.quote1.id) 
-        self.assertEqual(self.quote1.movie[0].id, self.movie1.id)
 
     def test_characters_model(self):
         char2 = Character(
@@ -172,7 +172,7 @@ class ModelsTestCase(TestCase):
         db.session.commit()
 
         self.assertEqual(char2.id, "c2")
-        self.assertEqual(char2.dialog, "Nope")
+        self.assertEqual(char2.name, "Dango")
         self.assertEqual(len(char2.quotes), 0)   
         self.assertEqual(len(char2.comms), 0)
         self.assertEqual(len(char2.commedusers), 0)
@@ -182,7 +182,7 @@ class ModelsTestCase(TestCase):
         quote2 = Quote(
             id = "q2",
             dialog = "Nope",
-            movie_id = "m3",
+            movie_id = "m1",
             char_id = "c1"
         )
         db.session.add(quote2)
