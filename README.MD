@@ -28,4 +28,4 @@ Finally, I used Twitter Bootstrap and CSS to make the webpage look as presentabl
 Create an account at https://the-one-api.dev/ to be assigned a bearer token. Create an .env file and enter TOKEN = yourtokenhere. Create a user to be able to log in, favorite, and comment on your favorite quotes and characters. Clicking most elements will redirect you to associated pages.
 
 
-I wish I had chosen a better API but I unfortunately took that part of the project too lightly. It is very barebones and my skills are still lacking but I hope you enjoy.
+I wish I had chosen a better API but I unfortunately took that part of the project too lightly. Despite the API's limitation I did my best to make a functioning app. Hope you enjoy.

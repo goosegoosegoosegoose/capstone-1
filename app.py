@@ -16,12 +16,11 @@ app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 debug = DebugToolbarExtension(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///lotr'
+app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', 'postgresql:///lotr'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 connect_db(app)
-db.create_all()
 
 url = 'https://the-one-api.dev/v2'
 token = os.environ.get("TOKEN")

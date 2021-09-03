@@ -26,7 +26,7 @@
       {% endif %}
     </tr>
   </thead>
-  <tbody id="chars-tbody content">
+  <tbody class="content" id="chars-tbody">
     {% for char in chars %}
     <tr class ="char-list-item item" id="{{char.id}}" style="cursor: pointer;">
       <td scope="col">{{char.name}}</td></col>
@@ -60,9 +60,16 @@
     {% endfor %}
   </tbody>
 </table>
-<div class="pagination">
-  
-</div>
+<ul class="pagination pagination-md justify-content-center">
+  <li class="page-item previous-page disabled"><a class="page-link" href="#">Prev</a></li>
+  <li class="page-item current-page active"><a class="page-link" href="#">1</a></li>
+  <li class="page-item dots"><a class="page-link" href="#">...</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">5</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">6</a></li>
+  <li class="page-item dots"><a class="page-link" href="#">...</a></li>
+  <li class="page-item current-page"><a class="page-link" href="#">10</a></li>
+  <li ckass="page-item next-page"><a class="page-link" href="#">Next</a></li>
+</ul>
 {% endif %}
 
 {% if not chars[0] %}

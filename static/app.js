@@ -152,7 +152,7 @@ function getPageList(totalPages, page, maxLength) {
 
 $(function(){
     let numberOfItems = $(".content .item").length;
-    let limitPerPage = 4;
+    let limitPerPage = 6;
     let totalPages = Math.ceil(numberOfItems / limitPerPage);
     let paginationSize = 7;
     let currentPage;

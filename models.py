@@ -34,16 +34,6 @@ class Comment(db.Model):
     char_id = db.Column(db.Text, db.ForeignKey('characters.id', ondelete='cascade'))
     quote_id = db.Column(db.Text, db.ForeignKey('quotes.id', ondelete='cascade'))
 
-# class QuoteComment(db.Model):
-#     """User comments on quotes"""
-
-#     __tablename__="quotecomms"
-
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     comment = db.Column(db.Text, nullable=False)
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'))
-#     quote_id = db.Column(db.Text, db.ForeignKey('quotes.id', ondelete='cascade'))
-
 
 class User(db.Model):
     """Users table"""
