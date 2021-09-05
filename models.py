@@ -61,16 +61,6 @@ class User(db.Model):
 
     comms = db.relationship("Comment", passive_deletes=True, backref="user")
 
-    commedchars = db.relationship("Character", 
-                                secondary="comments", 
-                                primaryjoin=(Comment.user_id == id),
-                                passive_deletes=True)
-
-    commedquotes = db.relationship("Quote", 
-                                secondary="comments", 
-                                primaryjoin=(Comment.user_id == id), 
-                                passive_deletes=True)                                
-
     @classmethod
     def signup(cls, username, email, password, image_url, bio):
         """Sign up user"""
@@ -139,11 +129,6 @@ class Character(db.Model):
 
     comms = db.relationship("Comment", passive_deletes=True, backref="char")
 
-    commedusers = db.relationship("User", 
-                        secondary="comments", 
-                        primaryjoin=(Comment.char_id == id))
-
-
 class Quote(db.Model):
     """Quotes from movies only"""
 
@@ -155,7 +140,3 @@ class Quote(db.Model):
     char_id = db.Column(db.Text, db.ForeignKey('characters.id', ondelete='cascade'))
 
     comms = db.relationship("Comment", passive_deletes=True, backref="quote")
-    
-    commedusers = db.relationship("User", 
-                            secondary="comments", 
-                            primaryjoin=(Comment.quote_id == id))

@@ -122,7 +122,10 @@ $("#random-quotes").on("click", "div.quote", function(evt){
     id = $(evt)[0].currentTarget.id
 
     location.href = `/quotes/${id}`
-}) ;
+});
+
+// i think i can do it
+
 
 // pagination
 function getPageList(totalPages, page, maxLength) {

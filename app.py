@@ -18,7 +18,7 @@ debug = DebugToolbarExtension(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', 'postgresql:///lotr'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = False
 
 url = 'https://the-one-api.dev/v2'
 token = os.environ.get("TOKEN")
@@ -101,11 +101,17 @@ def get_quotes():
         res = requests.get("https://the-one-api.dev/v2/quote?page=" + str(page), headers=headers)
         res = res.json()         
 
+
         for quote in res["docs"]:
 
             if not Character.query.get(quote["character"]):
                 continue
 
+            if db.session.query(Quote).filter_by(dialog=quote["dialog"]).first():
+                rep = db.session.query(Quote).filter_by(dialog=quote["dialog"]).first()
+                if rep.dialog == quote["dialog"] and rep.char_id == quote["character"]:
+                    continue
+            
             _quote = Quote(
                 id = quote["_id"],
                 dialog = quote["dialog"],
@@ -335,6 +341,7 @@ def quote_fav(quote_id):
 
 
 
+
 @app.route("/")
 def homepage():
     """Hompage"""
@@ -342,7 +349,7 @@ def homepage():
     movies = Movie.query.all()
     quotes = Quote.query.all()
     chars = Character.query.all()
-    r = list(range(0,2273))
+    r = list(range(0,len(quotes)))
     
     session['CURR_PATH'] = request.path
     return render_template("homepage.html", movies=movies, quotes=quotes, chars=chars, r=r)
@@ -388,7 +395,10 @@ def homepage_random_quotes():
 
 
 
+
 # movies -------------
+
+
 
 
 
@@ -412,7 +422,9 @@ def movie_page(movie_id):
 
 
 
+
 # characters -------------------------------------
+
 
 
 
@@ -468,7 +480,9 @@ def add_char_comment(char_id):
 
 
 
+
 # quotes -----------------------
+
 
 
 

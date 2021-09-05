@@ -79,8 +79,6 @@ class ModelsTestCase(TestCase):
         self.assertEqual(len(u.favchars), 0)
         self.assertEqual(len(u.favquotes), 0)
         self.assertEqual(len(u.comms), 0)
-        self.assertEqual(len(u.commedchars), 0)
-        self.assertEqual(len(u.commedquotes), 0)
 
     def test_user_favoriting_char(self):
         self.u1.favchars.append(self.char1)
@@ -175,7 +173,6 @@ class ModelsTestCase(TestCase):
         self.assertEqual(char2.name, "Dango")
         self.assertEqual(len(char2.quotes), 0)   
         self.assertEqual(len(char2.comms), 0)
-        self.assertEqual(len(char2.commedusers), 0)
         self.assertEqual(len(db.session.query(Character.id).all()), 2)
 
     def test_quotes_model(self):
@@ -191,7 +188,6 @@ class ModelsTestCase(TestCase):
         self.assertEqual(quote2.id, "q2")
         self.assertEqual(quote2.dialog, "Nope")
         self.assertEqual(len(quote2.comms), 0)
-        self.assertEqual(len(quote2.commedusers), 0)
         self.assertEqual(len(db.session.query(Quote.id).all()), 2)
 
 # SELECT pg_terminate_backend(pid) from pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'lotr_test';

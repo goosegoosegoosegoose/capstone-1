@@ -24,8 +24,11 @@ Finally, I used Twitter Bootstrap and CSS to make the webpage look as presentabl
 - I like the background but it makes the white text, which I think is the most contrasting, a bit illegible sometimes. Unsure how to fix other than making boxes underneath text, which might be more ugly.
 
 
-## How to use:
-Create an account at https://the-one-api.dev/ to be assigned a bearer token. Create an .env file and enter TOKEN = yourtokenhere. Create a user to be able to log in, favorite, and comment on your favorite quotes and characters. Clicking most elements will redirect you to associated pages.
+## How to use (Users):
+Click the "Get random quotes!" button to see 20 new random quotes. Use the navbar to navigate various pages. Create a user to be able to log in, favorite, and comment on your favorite quotes and characters. Clicking most elements will redirect you to associated pages.
 
+## How to use (Developers):
+Create an account at https://the-one-api.dev/ to be assigned a bearer token. Create an .env file and enter TOKEN = yourtokenhere. Requests should be sent out and database should be filled on load, so long as the app detects anything is empty.
 
-I wish I had chosen a better API but I unfortunately took that part of the project too lightly. Despite the API's limitation I did my best to make a functioning app. Hope you enjoy.
+## Conclusion:
+Despite the API's limitation I did my best to make a functioning app. Hope you enjoy.
