@@ -98,34 +98,112 @@ $("#random-btn").on("click", async function(evt){
 
     let res = await axios.get("/random");
 
-    for (let i=0; i < Object.keys(res.data.quotes).length; i++){        
-        $("#random-quotes").append(
-            `<div class="col-md-6">
-                <div class="card quote my-3" id="${res.data.quotes[i].id}">
-                    <div class="card-body">
-                        <blockquote class="blockquote">
-                            <p>${res.data.quotes[i].dialog}</p>
-                            <footer class="blockquote-footer">
-                                <a href="/characters/${res.data.quotes[i].char_id}">${res.data.quotes[i].char}</a>
-                            </footer>
-                        </blockquote>
+    if (res.data.status == "unsigned") {
+        for (let i=0; i < Object.keys(res.data.quotes).length; i++){       
+            $("#random-quotes").append(
+                `<div class="col-md-6">
+                    <div class="card quote my-3" id="${res.data.quotes[i].id}">
+                        <div class="card-body">
+                            <blockquote class="blockquote">
+                                <p>${res.data.quotes[i].dialog}</p>
+                                <footer class="blockquote-footer">
+                                    <a href="/characters/${res.data.quotes[i].char_id}">${res.data.quotes[i].char}</a>
+                                </footer>
+                            </blockquote>
+                        </div>
                     </div>
-                </div>
-            </div>`
-        )
+                </div>`
+            )
+        }
+    }
+    else {
+        for (let i=0; i < Object.keys(res.data.quotes).length; i++){
+            if (res.data.quotes[i].faveduser.includes(res.data.user_id)) {
+                $("#random-quotes").append(
+                    `<div class="col-md-6">
+                        <div class="card quote my-3" id="${res.data.quotes[i].id}">
+                            <div class="card-body">
+                                <blockquote class="blockquote">
+                                    <p>${res.data.quotes[i].dialog}</p>
+                                    <footer class="blockquote-footer">
+                                        <a href="/characters/${res.data.quotes[i].char_id}">${res.data.quotes[i].char}</a>
+                                    </footer>
+                                    <div class="btn-toolbar">
+                                        <div id="${res.data.quotes[i].short_id}" data-id="${res.data.quotes[i].id}">
+                                            <button class="btn btn-info text-white" data-id="${res.data.quotes[i].id}">Unlike</button>
+                                        </div>
+                                        <a href="/quotes/${res.data.quotes[i].id}/add-comment">
+                                            <button type="button" class="btn btn-success mx-2">Comment</button>
+                                        </a>
+                                    </div>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>`
+                )
+            }
+            else {
+                $("#random-quotes").append(
+                    `<div class="col-md-6">
+                        <div class="card quote my-3" id="${res.data.quotes[i].id}">
+                            <div class="card-body">
+                                <blockquote class="blockquote">
+                                    <p>${res.data.quotes[i].dialog}</p>
+                                    <footer class="blockquote-footer">
+                                        <a href="/characters/${res.data.quotes[i].char_id}">${res.data.quotes[i].char}</a>
+                                    </footer>
+                                    <div class="btn-toolbar">
+                                        <div id="${res.data.quotes[i].short_id}" data-id="${res.data.quotes[i].id}">
+                                        <button class="btn btn-info" data-id="${res.data.quotes[i].id}">Like</button>
+                                        </div>
+                                        <a href="/quotes/${res.data.quotes[i].id}/add-comment">
+                                            <button type="button" class="btn btn-success mx-2">Comment</button>
+                                        </a>
+                                    </div>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>`
+                )
+            }
+        }
     }
 });
 
-// I tried putting the like and comment buttons on, but they required jinja so I couldn't. Until I learn a way, this way it will stay.
 
 $("#random-quotes").on("click", "div.quote", function(evt){
     id = $(evt)[0].currentTarget.id
 
+    for (let i =0; i < $("button").length; i++){
+        if (evt.target == $("button")[i]){
+        return
+    }};
+
     location.href = `/quotes/${id}`
 });
 
-// i think i can do it
+$("#random-quotes").on("click", "button.btn-info", async function(evt){
+    evt.preventDefault();
 
+    let id = $(evt)[0].currentTarget.dataset.id;
+    let divId = id.substring(id.length - 4);
+
+    let res = await axios.post(`/users/fav_quote/${id}`);
+
+    if (res.data.action[1] == 'like'){
+        $(`#${divId}`).empty();
+
+        $(`#${divId}`).append(
+            `<button class="btn btn-info text-white" data-id="${id}">Unlike</button>`
+        )}
+
+    else if (res.data.action[1] == 'unlike'){
+        $(`#${divId}`).empty();
+        
+        $(`#${divId}`).append(
+            `<button class="btn btn-info" data-id="${id}">Like</button>`
+        )}
+});
 
 // pagination
 function getPageList(totalPages, page, maxLength) {

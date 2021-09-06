@@ -370,6 +370,13 @@ def search_results():
 def homepage_random_quotes():
     """Get 10 random quotes for webpage"""
 
+    if not g.user:
+        status = "unsigned"
+        user_id = ""
+    else:
+        status = "signed"
+        user_id = g.user.id
+
     quotes = Quote.query.all()
     
     length = list(range(0,len(quotes)))
@@ -378,6 +385,11 @@ def homepage_random_quotes():
     for i in range(0,20):
 
         num = random.choice(length)
+        faved_user_ids = []
+
+        for user in quotes[num].faveduser:
+            faved_user_ids.append(user.id)
+
         data = {
             "id": quotes[num].id,
             "short_id": quotes[num].id[-4:],
@@ -386,12 +398,12 @@ def homepage_random_quotes():
             "movie_id": quotes[num].movie_id,
             "char": Character.query.get(quotes[num].char_id).name,
             "char_id": quotes[num].char_id,
-            "faveduser": quotes[num].faveduser
+            "faveduser": faved_user_ids
         }
         results[i] = data
         length.remove(num)
 
-    return jsonify(quotes=results)
+    return jsonify(quotes=results, status=status, user_id=user_id)
 
 
 

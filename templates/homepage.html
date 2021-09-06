@@ -36,6 +36,22 @@
                         <footer class="blockquote-footer">
                             <a href="/characters/{{quotes[num].char_id}}">{{quotes[num].char.name}}</a>
                         </footer>
+                        {% if g.user %}
+                        <div class="btn-toolbar">
+                            <div id="{{quotes[num].id[-4:]}}" data-id="{{quotes[num].id}}">
+                                {% if g.user in quotes[num].faveduser %}
+                                    {% if g.user.id == quotes[num].faveduser[quotes[num].faveduser.index(g.user)].id %}
+                                    <button class="btn btn-info text-white" data-id="{{quotes[num].id}}">Unlike</button>
+                                    {% endif %}
+                                {% else %}
+                                <button class="btn btn-info" data-id="{{quotes[num].id}}">Like</button>
+                                {% endif %}
+                            </div>
+                            <a href="/quotes/{{quotes[num].id}}/add-comment">
+                                <button type="button" class="btn btn-success mx-2">Comment</button>
+                            </a>
+                        </div>
+                        {% endif %}
                     </blockquote>
                 </div>
             </div>
