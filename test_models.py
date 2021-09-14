@@ -47,11 +47,6 @@ class ModelsTestCase(TestCase):
 
         db.session.commit()
 
-        # u1 = User.query.get(11)
-        # movie1 = Movie.query.get("m1")
-        # char1 = Character.query.get("c1")
-        # quote1 = Quote.query.get("q1")
-
         self.u1 = u1
         self.movie1 = movie1
         self.char1 = char1
@@ -139,17 +134,20 @@ class ModelsTestCase(TestCase):
             User.signup("testtest", "email@email.com", None, None, None)
 
     def test_movies_model(self):
+        id = "m2"
+        name = "Dango's Journey"
+
         movie2 = Movie(
-            id = "m2",
-            name = "Dango's Journey"
+            id = id,
+            name = name
         )
         db.session.add(movie2)
         db.session.commit()
 
         movie2 = Movie.query.get(movie2.id)
 
-        self.assertEqual(movie2.id, "m2")
-        self.assertEqual(movie2.name, "Dango's Journey")
+        self.assertEqual(movie2.id, id)
+        self.assertEqual(movie2.name, name)
         self.assertEqual(len(movie2.quotes), 0)
         self.assertEqual(len(db.session.query(Movie.id).all()), 2)
     
@@ -162,33 +160,45 @@ class ModelsTestCase(TestCase):
         self.assertEqual(self.movie1.quotes[0].id, self.quote1.id) 
 
     def test_characters_model(self):
+
+        id = "c2"
+        name = "Dango"
+
         char2 = Character(
-            id = "c2",
-            name = "Dango"
+            id = id,
+            name = name
         )
         db.session.add(char2)
         db.session.commit()
 
-        self.assertEqual(char2.id, "c2")
-        self.assertEqual(char2.name, "Dango")
+        self.assertEqual(char2.id, id)
+        self.assertEqual(char2.name, name)
         self.assertEqual(len(char2.quotes), 0)   
         self.assertEqual(len(char2.comms), 0)
         self.assertEqual(len(db.session.query(Character.id).all()), 2)
 
     def test_quotes_model(self):
+        id = "q2"
+        dialog = "Nope"
+        movie_id = "m1"
+        char_id = "c1"
+
         quote2 = Quote(
-            id = "q2",
-            dialog = "Nope",
-            movie_id = "m1",
-            char_id = "c1"
+            id = id,
+            dialog = dialog,
+            movie_id = movie_id,
+            char_id = char_id
         )
         db.session.add(quote2)
         db.session.commit()
 
-        self.assertEqual(quote2.id, "q2")
-        self.assertEqual(quote2.dialog, "Nope")
+        self.assertEqual(quote2.id, id)
+        self.assertEqual(quote2.dialog, dialog)
+        self.assertEqual(quote2.movie_id, movie_id)
+        self.assertEqual(quote2.char_id, char_id)
         self.assertEqual(len(quote2.comms), 0)
+        self.assertEqual(quote2.movie, self.movie1)
+        self.assertEqual(quote2.char, self.char1)
         self.assertEqual(len(db.session.query(Quote.id).all()), 2)
 
 # SELECT pg_terminate_backend(pid) from pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'lotr_test';
-# useful for terminating other sessions you can't find

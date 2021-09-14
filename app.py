@@ -26,6 +26,7 @@ headers = {'Authorization': f'Bearer {token}'}
 CURR_USER_KEY = "curr_user"
 CURR_PATH = "curr_path"
 
+
 connect_db(app)
 
 # Pre-load functions
@@ -143,6 +144,12 @@ def add_user_to_g():
     else:
         g.user = None
 
+@app.before_request
+def check_curr_path():
+    """check if curr_path exists"""
+    if CURR_PATH not in session:
+        session[CURR_PATH] = "http://localhost:5000/"
+
 
 def do_login(user):
     """Log in user"""
@@ -165,7 +172,7 @@ def signup():
     """Handle creating user"""
 
     form = CreateUserForm()
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if form.validate_on_submit():
         try:
@@ -193,7 +200,7 @@ def login():
     """handling user login"""
 
     form = LoginForm()
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if form.validate_on_submit():
         user= User.authenticate(
@@ -216,7 +223,7 @@ def login():
 def logout():
     """logout handler"""
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     
     if not g.user:
         flash("User is not logged in", "danger")
@@ -224,7 +231,7 @@ def logout():
 
     do_logout()
     flash("Succussfully logged out", "success")
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     return redirect(f"{prev_url}")
 
 @app.route("/users/<int:user_id>")
@@ -233,13 +240,13 @@ def user_page(user_id):
 
     user = User.query.get_or_404(user_id)
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("users/page.html", user=user)
 
 @app.route("/users/edit", methods=["GET", "POST"])
 def edit_user():
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     
     if not g.user:
         flash("Please log in to edit profile", "danger")
@@ -268,7 +275,7 @@ def edit_user():
 @app.route("/users/delete")
 def delete_user():
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     if not g.user:
         flash("Action unavailable", "danger")
         return redirect(f"{prev_url}")
@@ -287,7 +294,7 @@ def delete_user():
 @app.route("/users/fav_char/<char_id>", methods=["POST"])
 def char_fav(char_id):
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     if not g.user:
         flash("Log in to favorite characters", "danger")
         return redirect(f"{prev_url}")
@@ -312,7 +319,7 @@ def char_fav(char_id):
 @app.route("/users/fav_quote/<quote_id>", methods=["POST"])
 def quote_fav(quote_id):
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     if not g.user:
         flash("Log in to favorite quotes", "danger")
         return redirect(f"{prev_url}")
@@ -351,7 +358,7 @@ def homepage():
     chars = Character.query.all()
     r = list(range(0,len(quotes)))
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("homepage.html", movies=movies, quotes=quotes, chars=chars, r=r)
 
 @app.route("/results", methods=["POST"])
@@ -420,7 +427,7 @@ def movies_page():
 
     movies = Movie.query.all()    
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("movies/movies.html", movies=movies)
 
 @app.route("/movies/<movie_id>")
@@ -429,7 +436,7 @@ def movie_page(movie_id):
 
     movie = Movie.query.get_or_404(movie_id)
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("movies/movie_page.html", movie=movie)
 
 
@@ -447,7 +454,7 @@ def chars_page():
     movies = Movie.query.all()
     chars = Character.query.all()
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("characters/characters.html", chars=chars, movies=movies)
 
 @app.route("/characters/<char_id>")
@@ -455,20 +462,20 @@ def char_page(char_id):
     """Character page with affliated quotes and user comments"""
 
     char = Character.query.get(char_id)
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if not char:
         flash("Character is not in database", "danger")
         return redirect(f"{prev_url}")
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("characters/character_page.html", char=char)
 
 @app.route("/characters/<char_id>/add-comment", methods=["GET", "POST"])
 def add_char_comment(char_id):
     """Add a comment to character"""
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
     if not g.user:
         flash("Log in to comment", "danger")
         return redirect(f"{prev_url}")
@@ -488,7 +495,7 @@ def add_char_comment(char_id):
         flash("Comment added!", "success")
         return redirect(f'{prev_url}')
     
-    return render_template("characters/char_comment_form.html", form=form, char=char)
+    return render_template("characters/char_comment_form.html", form=form, char=char, prev_url=prev_url)
 
 
 
@@ -506,7 +513,7 @@ def quotes_page():
     movies = Movie.query.all()
     quotes = Quote.query.all()
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("quotes/quotes.html", quotes=quotes, movies=movies)
 
 @app.route("/quotes/<quote_id>")
@@ -515,14 +522,14 @@ def quote_page(quote_id):
 
     quote = Quote.query.get_or_404(quote_id)
     
-    session['CURR_PATH'] = request.path
+    session[CURR_PATH] = request.path
     return render_template("quotes/quote_page.html", quote=quote)
 
 @app.route("/quotes/<quote_id>/add-comment", methods=["GET", "POST"])
 def add_quote_comment(quote_id):
     """Add comment to quote"""
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if not g.user:
         flash("Log in to comment", "danger")
@@ -530,7 +537,7 @@ def add_quote_comment(quote_id):
 
     form = AddCommentForm()
     quote = Quote.query.get_or_404(quote_id)
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if form.validate_on_submit():
         comment = Comment(
@@ -550,7 +557,7 @@ def add_quote_comment(quote_id):
 def delete_comment(comment_id):
     """Delete comment if owner of comment"""
 
-    prev_url = session['CURR_PATH']
+    prev_url = session[CURR_PATH]
 
     if not g.user:
         flash("Access Denied", "danger")

@@ -20,12 +20,10 @@
             </ul>
 
             <div class="ms-auto d-flex">
-                {% if g.user %}
                 <form action="/results" class="d-flex" method="POST">
                     <input class="form-control mr-sm-2" name="search" type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-success my-2 my-sm-0 mx-2" type="submit">Search</button>
                 </form>
-                {% endif %}
                 <ul class="navbar-nav mx-5">
                     {% if not g.user %}
                     <li class="nav-item"><a class="nav-link" href="/signup">Create User</a></li>
